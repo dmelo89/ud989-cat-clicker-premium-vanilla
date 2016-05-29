@@ -49,6 +49,7 @@ var octopus = {
         // tell our views to initialize
         catListView.init();
         catView.init();
+        adminView.init();
     },
 
     getCurrentCat: function() {
@@ -68,6 +69,25 @@ var octopus = {
     incrementCounter: function() {
         model.currentCat.clickCount++;
         catView.render();
+        adminView.render();
+    },
+
+    // Shows Admin Panel
+    showAdmin: function() {
+        document.getElementById("admin-form").style.display = 'block';
+        console.log("works")
+    },
+
+    // Hides Admin Panel
+    hideAdmin: function() {
+        document.getElementById("admin-form").style.display = 'none';
+    },
+
+    // Admin Save
+    saveAdmin: function(name, url, clicks) {
+        model.currentCat.name = name;
+        model.currentCat.clickCount = clicks;
+        model.currentCat.imgSrc = url;
     }
 };
 
@@ -135,6 +155,7 @@ var catListView = {
                 return function() {
                     octopus.setCurrentCat(catCopy);
                     catView.render();
+                    adminView.render();
                 };
             })(cat));
 
@@ -142,6 +163,59 @@ var catListView = {
             this.catListElem.appendChild(elem);
         }
     }
+};
+
+var adminView = {
+
+    init: function() {
+
+        // store the DOM element for easy access later
+        this.adminInputName = document.getElementById('catName');
+        this.adminInputURL = document.getElementById('catURL');
+        this.adminInputClicks = document.getElementById('catClicks');
+        this.adminInputSubmit = document.getElementById('submit');
+        this.adminInputCancel = document.getElementById('cancel');
+        this.adminToggle = document.getElementById('admin-toggle');
+
+        // on click admin, show admin
+        this.adminToggle.addEventListener('click', function(){
+            octopus.showAdmin();
+        });
+
+        // on cancel click, hide admin
+        this.adminInputCancel.addEventListener('click', function(){
+            octopus.hideAdmin();
+        });
+
+
+        this.render();
+    },
+
+    render: function() {
+        // update the DOM elements with values from the current cat
+        var currentAdminCat = octopus.getCurrentCat();
+        this.adminInputName.value = currentAdminCat.name;
+        this.adminInputClicks.value = currentAdminCat.clickCount;
+        this.adminInputURL.value = currentAdminCat.imgSrc;
+        var saveButton = this.adminInputSubmit;
+
+
+        
+
+        // on click, setCurrentCat and render the catView
+        // (this uses our closure-in-a-loop trick to connect the value
+        //  of the cat variable to the click event function)
+        saveButton.addEventListener('click', (function() {
+        nameCat = document.getElementById('catName').value;
+        clicks = document.getElementById('catClicks').value;
+        url = document.getElementById('catURL').value;
+                octopus.saveAdmin(nameCat,url,clicks);
+                  catView.render();
+                  adminView.render();
+        }));
+
+    }
+
 };
 
 // make it go!
